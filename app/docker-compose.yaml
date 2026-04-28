@@ -1,0 +1,21 @@
+services:
+  app:
+    build: .
+    image: ayashben/el-app:latest
+    container_name: el-app
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    expose:
+      - "9090"
+    restart: unless-stopped
+
+  nginx:
+    image: ayashben/el-nginx:latest
+    container_name: el-nginx
+    ports:
+      - "8080:8080"
+    volumes:
+      - ./default.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - app
+    restart: unless-stopped

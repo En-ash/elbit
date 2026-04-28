@@ -1,4 +1,4 @@
-import subprocess
+import subprocess, json
 
 # Execute docker ps and capture output
 def get_docker_containers():
@@ -12,7 +12,6 @@ def get_docker_containers():
         if line:
             container_id, name = line.split(maxsplit=1)
             containers.append({'id': container_id, 'name': name})
-            print(f"Container: {name} (ID: {container_id})")
 
     return containers
 
@@ -25,7 +24,11 @@ app = Flask(__name__)
 
 @app.route("/")
 def index():
-    return render_template("index.html", containers = get_docker_containers())
+
+    #return render_template("index.html", containers = get_docker_containers())
+    js = json.dumps(get_docker_containers())
+    print(js)
+    return js
 
 
 if __name__ == "__main__":
