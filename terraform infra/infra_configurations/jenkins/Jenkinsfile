@@ -1,0 +1,144 @@
+pipeline {
+    agent {
+        kubernetes {
+            yaml """
+apiVersion: v1
+kind: Pod
+spec:
+  containers:
+  - name: jnlp
+    image: jenkins/inbound-agent
+    args: ['\$(JENKINS_SECRET)', '\$(JENKINS_NAME)']
+    env:
+      - name: JENKINS_JAVA_OPTS
+        value: "-Dhudson.remoting.Engine.noCertificateCheck=true"
+      - name: JENKINS_AGENT_PROPERTIES
+        value: "-Djenkins.slaves.JnlpAgentEndpointResolver.allowInsecure=true"
+      - name: GIT_SSL_NO_VERIFY
+        value: true
+  - name: python
+    image: python:3.11-slim
+    command: ['cat']
+    tty: true
+  - name: app-test
+    image: python:3.11-slim 
+    command: ['cat']
+    tty: true
+  - name: kaniko
+    image: gcr.io/kaniko-project/executor:debug
+    command: ['sleep']
+    args: ['9999999']
+"""
+        }
+    }
+    environment {
+        GIT_SSL_NO_VERIFY = 'true'
+    }
+    stages {
+         stage('Ignore-SSL') {
+             steps {
+                sh 'git config --global http.sslVerify false'
+            }
+         }
+         
+        
+        stage('Checkout') {
+            steps {
+                withEnv(["GIT_SSL_NO_VERIFY=true"]) {
+                    checkout([
+                        $class: 'GitSCM',
+                        branches: [[name: 'staging']], 
+                        extensions: [
+                            // This forces Jenkins to create a local branch named 'staging'
+                            // instead of staying in a "Detached HEAD" state
+                            [$class: 'LocalBranch', localBranch: 'staging'],
+                            // This ensures the workspace is scrubbed of the 'jenkins' branch files
+                            [$class: 'WipeWorkspace']
+                        ],
+                        userRemoteConfigs: [[
+                            url: 'https://gitlab.sponja.co.il/devops/weather.git',
+                            credentialsId: 'gitlab-impersonation-token'
+                        ]]
+                    ])
+                }
+            }
+        }
+
+        stage('Install & Lint') {
+            steps {
+                container('python') {
+                    sh 'pip install pylint flask' 
+                    sh "pylint main.py --score=y | tail -2 | awk '{print \$7; exit}' | awk -F '/' '{print \$1}'" 
+                }
+            }
+        }
+
+        stage('Integration Test') {
+            steps {
+                container('app-test') {
+                    script {
+                        sh 'pip install flask requests'
+                        sh 'python main.py &' 
+                        sh '''
+                            apt-get update
+                            apt-get install -y curl
+                        '''
+                        sleep(15) // Wait for app to boot
+                        
+                        sh 'curl -f http://localhost:9090' 
+                    }
+                }
+            }
+        }
+        stage('Build & Upload') {
+            steps {
+                container('kaniko') {
+                    withCredentials([usernamePassword(
+                        credentialsId: 'dockerhub-credentials',
+                        usernameVariable: 'DOCKER_USER',
+                        passwordVariable: 'DOCKER_PASS'
+                    )]) {
+                        sh """
+                        mkdir -p /kaniko/.docker
+                        echo "{\\"auths\\":{\\"https://index.docker.io/v1/\\":{\\"auth\\":\\"\$(echo -n \${DOCKER_USER}:\${DOCKER_PASS} | base64)\\"}}}" > /kaniko/.docker/config.json
+                        
+                        /kaniko/executor --context \$(pwd) --dockerfile Dockerfile --destination docker.io/ayashben/weather_app:latest
+                        """
+                    }
+                }
+            }
+        }
+    }     
+
+    post {
+        always {
+            cleanWs()
+        }
+        success {
+            slackSend(channel: "#devops-alert-succeeded", message: """
+            *Build Success*
+            *Job:* ${env.JOB_NAME}
+            *Build:* #${env.BUILD_NUMBER}
+            *Branch:* ${env.BRANCH_NAME}
+            *Commit:* ${env.GIT_COMMIT}
+            *Stage:* ${env.STAGE_NAME}
+            *Pylint Score:* ${env.PYLINT_SCORE}
+            *URL:* ${env.BUILD_URL}
+            """)
+            build job: 'deploy_production', wait: false
+        }
+        failure {
+            slackSend(channel: "#devops-alert-failed", message: """
+            *Build Failed*
+            *Job:* ${env.JOB_NAME}
+            *Build:* #${env.BUILD_NUMBER}
+            *Branch:* ${env.BRANCH_NAME}
+            *Commit:* ${env.GIT_COMMIT}
+            *Stage:* ${env.STAGE_NAME}
+            *Pylint Score:* ${env.PYLINT_SCORE}
+            *URL:* ${env.BUILD_URL}
+            """)
+        }
+    }
+}
+

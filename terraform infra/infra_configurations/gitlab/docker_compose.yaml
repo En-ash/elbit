@@ -1,0 +1,29 @@
+services:
+  gitlab:
+    image: gitlab/gitlab-ee:latest
+    container_name: gitlab
+    restart: always
+    hostname: gitlab_server
+    ports:
+      - "80:80"
+      - "443:443"
+      - "2222:22"
+
+    volumes:
+      - ./config:/etc/gitlab
+      - ./logs:/var/log/gitlab
+      - ./data:/var/opt/gitlab
+
+    environment:
+      GITLAB_OMNIBUS_CONFIG: |
+        external_url 'https://gitlab.sponja.co.il'
+        gitlab_rails['gitlab_shell_ssh_port'] = 2222
+        nginx['proxy_set_headers'] = {
+          "X-Forwarded-Proto" => "https",
+          "X-Forwarded-Ssl" => "on"
+        }
+        nginx['listen_port'] = 80
+        nginx['listen_https'] = false
+        
+        nginx['real_ip_trusted_addresses'] = ['10.0.0.0/16']
+        nginx['real_ip_header'] = 'X-Forwarded-For'
