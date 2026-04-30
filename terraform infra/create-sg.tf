@@ -1,7 +1,7 @@
 module "ec2_sg"{
     source = "./modules/aws/security/security-group/"
     
-    sg_name = "elbit-sg"
+    sg_name = "ec2-sg-jenkins-gitlab"
     vpc_id = module.vpc.vpc_id
 
     inbound = [{
@@ -19,6 +19,12 @@ module "ec2_sg"{
     {        
         from_port   = 80
         to_port     = 80
+        protocol    = "tcp"
+        cidr_blocks = ["0.0.0.0/0"]
+    },
+    {        
+        from_port   = 5000
+        to_port     = 5000
         protocol    = "tcp"
         cidr_blocks = ["0.0.0.0/0"]
     },

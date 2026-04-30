@@ -1,4 +1,4 @@
-env = "elbit"
+env = "staging"
 eks_version = "1.35"
 
 region_name = "us-east-1"

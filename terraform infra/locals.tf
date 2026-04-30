@@ -1,6 +1,6 @@
 # General Configurations
 locals {
-  env_name = "${var.env}-"
+  env_name = "weather-${var.env}"
 }
 
 # Setup Configurations

@@ -1,8 +1,8 @@
 module "vpc"{
     source = "./modules/aws/networking/vpc"
 
-    env_name = "elbit"
-    vpc_name = "elbit-vpc"
+    env_name = "staging"
+    vpc_name = "testing"
     vpc_cidr = "10.0.0.0/16"
     public_subnets = {
         a = {

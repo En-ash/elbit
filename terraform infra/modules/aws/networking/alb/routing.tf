@@ -17,7 +17,7 @@ resource "aws_lb_listener" "https" {
     }
   }
 }
-/*
+
 # Rule 1: Route domain to EKS
 resource "aws_lb_listener_rule" "eks" {
   listener_arn = aws_lb_listener.https.arn
@@ -34,7 +34,7 @@ resource "aws_lb_listener_rule" "eks" {
     }
   }
 }
-*/
+
 # Rule 2: Route legacy.example.com to EC2
 resource "aws_lb_listener_rule" "ec2_jenkins" {
   listener_arn = aws_lb_listener.https.arn
@@ -51,7 +51,6 @@ resource "aws_lb_listener_rule" "ec2_jenkins" {
     }
   }
 }
-/*
 resource "aws_lb_listener_rule" "ec2_gitlab" {
   listener_arn = aws_lb_listener.https.arn
   priority     = 20
@@ -83,14 +82,14 @@ resource "aws_lb_listener_rule" "argocd" {
     }
   }
 }
-*/
+
 data "aws_route53_zone" "this" {
   name         = var.domain
   private_zone = false
 }
 
 resource "aws_route53_record" "www" {
-  for_each = toset( ["app.", "jenkins.", ""] )
+  for_each = toset( ["app.", "gitlab.", "jenkins.", "argocd.", "grafana.", ""] )
   zone_id = data.aws_route53_zone.this.zone_id
   name    = "${each.key}${var.domain}"
   type    = "A"

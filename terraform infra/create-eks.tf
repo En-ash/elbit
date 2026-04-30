@@ -1,45 +1,3 @@
-/*
-module "aws_eks_cluster" {
-    source = "../65_eks_project/modules/aws/eks/cluster/"
-    eks_name = "${var.env}-eks-cluster"
-    eks_version = var.eks_version
-
-    eks_cluster_iam_role_arn = module.eks_cluster_role.role_arn
-    eks_cluster_iam_role_name = module.eks_cluster_role.role_name
-
-    eks_cluster_policy_attachment = ["arn:aws:iam::aws:policy/AmazonEKSClusterPolicy"]
-
-
-    subnet_ids = [module.vpc.private_subnet_obj["c"], module.vpc.private_subnet_obj["d"]]
-}
-
-module "eks_nodes_apps" {
-    source = "../65_eks_project/modules/aws/eks/nodes/"
-    eks_name = module.aws_eks_cluster.eks_name
-    eks_version = var.eks_version
-    node_group_name = "${module.aws_eks_cluster.eks_name}-nodeGroup-${var.env}"
-
-    instance_types = [ "t3.small" ]
-    subnet_ids = [module.vpc.private_subnet_obj["c"]]
-
-    eks_node_iam_role_arn  = module.eks_cluster_node_role.role_arn
-    eks_node_iam_role_name = module.eks_cluster_node_role.role_name
-
-    eks_nodes_policy_attachment = [
-        "arn:aws:iam::aws:policy/AmazonEKSWorkerNodePolicy",
-        "arn:aws:iam::aws:policy/AmazonEKS_CNI_Policy",
-        "arn:aws:iam::aws:policy/AmazonEC2ContainerRegistryReadOnly"
-    ]
-
-    tags = {
-        "kubernetes.io/role/internal-elb" = "1"
-        "kubernetes.io/cluster/${module.aws_eks_cluster.eks_name}" = "owned"
-    }
-    
-    depends_on = [ module.eks_cluster_node_role ]
-}
-*/
-
 module "eks" {
   source  = "terraform-aws-modules/eks/aws"
   version = "21.18.0"
@@ -57,9 +15,11 @@ module "eks" {
       before_compute = true
     }
     aws-ebs-csi-driver = {
-      most_recent = true
+      most_recent              = true
+      service_account_role_arn = module.ebs_csi_irsa_role.iam_role_arn
     }
   }
+
 
   # Optional
   endpoint_public_access = true
@@ -101,7 +61,6 @@ module "eks" {
         "Environment"                     = "dev"
         nodepool                          = "system"
       }
-
     }
     staging = {
       # Starting on 1.30, AL2023 is the default AMI type for EKS managed node groups
@@ -198,3 +157,22 @@ module "eks" {
   }
 }
 
+module "ebs_csi_irsa_role" {
+  source  = "terraform-aws-modules/iam/aws//modules/iam-role-for-service-accounts-eks"
+  version = "~> 5.0" 
+
+  role_name = "${var.env}-ebs-csi"
+
+  attach_ebs_csi_policy = true
+
+  create_role = true
+
+  oidc_providers = {
+    main = {
+      provider_arn = module.eks.oidc_provider_arn
+      namespace_service_accounts = [
+        "kube-system:ebs-csi-controller-sa"
+      ]
+    }
+  }
+}

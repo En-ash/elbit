@@ -1,9 +1,3 @@
-/*
-data "aws_acm_certificate" "this" {
-  domain   = var.domain
-  statuses = ["ISSUED"]
-}*/
-
 resource "aws_lb" "this" {
   name               = "${var.env_name}-alb"
   internal           = false
