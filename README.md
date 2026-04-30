@@ -1,5 +1,3 @@
-# elbit
-
 # Elbit Assignment
 
 Assignment is divided into 2 sections:
