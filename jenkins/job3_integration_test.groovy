@@ -19,8 +19,8 @@ set -e
 echo ${DOCKER_PASS} | docker login -u ${DOCKER_USER} --password-stdin
 
 # Pull both images
-sudo docker pull ${APP_IMAGE}
-sudo docker pull ${NGINX_IMAGE}
+docker pull ${APP_IMAGE}
+docker pull ${NGINX_IMAGE}
 ''')
         shell('''
 #!/bin/bash
@@ -50,7 +50,7 @@ services:
 EOF
 
 # Run compose
-sudo docker compose -f docker-compose.yaml up -d
+docker compose -f docker-compose.yaml up -d
 sleep 20
 
 # Test HTTP 200 response and body contains "ok"
@@ -61,17 +61,17 @@ echo "Response Body: $BODY"
 
 if [ "$HTTP_CODE" != "200" ] || [ "$BODY" != "ok" ]; then
     echo "ERROR: Expected HTTP 200 and body 'ok' but got code=$HTTP_CODE body='$BODY'"
-    sudo docker compose -f docker-compose.yaml down
+    docker compose -f docker-compose.yaml down
     exit 1
 fi
 
 echo "SUCCESS: Received HTTP 200 and body 'ok'"
 
 # Clean up
-sudo docker compose -f docker-compose.yaml down
+docker compose -f docker-compose.yaml down
 ''')
     }
-    publishers {
+    publishers {    
         cleanWs {
             deleteDirs(true)
         }

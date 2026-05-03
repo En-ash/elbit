@@ -29,9 +29,9 @@ job('build-app') {
             #!/bin/bash
             set -e
 
-            sudo docker build -t ${DOCKER_APP_NAME}:${DOCKER_TAG} -t ${DOCKER_IMAGE_NAME}:${DOCKER_TAG} -f app.Dockerfile .
+            docker build -t ${DOCKER_APP_NAME}:${DOCKER_TAG} -t ${DOCKER_IMAGE_NAME}:${DOCKER_TAG} -f app.Dockerfile .
 
-            sudo docker run -d --name ${DOCKER_APP_NAME}-test -p 9090:9090 ${DOCKER_APP_NAME}:${DOCKER_TAG}
+            docker run -d --name ${DOCKER_APP_NAME}-test -p 9090:9090 ${DOCKER_APP_NAME}:${DOCKER_TAG}
             sleep 10
 
             # Test reachable
