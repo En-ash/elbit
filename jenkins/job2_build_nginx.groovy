@@ -40,6 +40,13 @@ job('build-nginx') {
     }
 
     publishers {   
+        postBuildScript {
+            wildcards {
+                buildStepWildcard {
+                    buildStatus('BOTH') 
+                }
+            }
+        }
         cleanWs {
             deleteDirs(true)
         }
