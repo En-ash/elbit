@@ -71,8 +71,8 @@ echo "SUCCESS: Received HTTP 200 and body 'ok'"
 docker compose -f docker-compose.yaml down
 ''')
     }
-    publishers {    
-        cleanWs {
+    publishers {
+        wsCleanup {
             deleteDirs(true)
         }
     }

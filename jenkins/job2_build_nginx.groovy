@@ -40,7 +40,7 @@ job('build-nginx') {
     }
 
     publishers {
-        cleanWs {
+        wsCleanup {
             deleteDirs(true)
         }
     }
