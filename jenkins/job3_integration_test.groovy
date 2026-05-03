@@ -72,13 +72,18 @@ sudo docker compose -f docker-compose.yaml down
 ''')
     }
     publishers {    
+        postBuildScript {
+            buildSteps {
+                shell {
+                    command('docker ps -aq | xargs -r docker stop | xargs -r docker rm || true')
+                }
+            }
+            onlyOnFailure(false)
+            onlyOnSuccess(false)
+            runIfResult('BOTH')
+        }
         cleanWs {
             deleteDirs(true)
         }
-        postBuildScripts {
-        steps {
-            shell('docker ps -aq | xargs -r docker stop | xargs -r docker rm || true')
-        }
-    }
     }
 }
