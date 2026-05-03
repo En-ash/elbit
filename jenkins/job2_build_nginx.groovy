@@ -28,13 +28,13 @@ job('build-nginx') {
             #!/bin/bash
             set -e
             
-            docker build -t ${DOCKER_APP_NAME}:${DOCKER_TAG} -t ${DOCKER_IMAGE_NAME}:${DOCKER_TAG} -f nginx.Dockerfile .
+            sudo docker build -t ${DOCKER_APP_NAME}:${DOCKER_TAG} -t ${DOCKER_IMAGE_NAME}:${DOCKER_TAG} -f nginx.Dockerfile .
             
             # Login to DockerHub
             echo ${DOCKER_PASS} | docker login -u ${DOCKER_USER} --password-stdin
 
             # Push image
-            docker push ${DOCKER_IMAGE_NAME}:${DOCKER_TAG}
+            sudo docker push ${DOCKER_IMAGE_NAME}:${DOCKER_TAG}
         '''.stripIndent())
 
     }
