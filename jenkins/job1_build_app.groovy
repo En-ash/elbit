@@ -46,14 +46,6 @@ job('build-app') {
 
     }
     publishers {    
-        postBuildScript {
-            buildSteps {
-                shell('docker ps -aq | xargs -r docker stop | xargs -r docker rm || true')
-            }
-            onlyOnFailure(false)
-            onlyOnSuccess(false)
-            runIfResult('BOTH')
-        }
         cleanWs {
             deleteDirs(true)
         }

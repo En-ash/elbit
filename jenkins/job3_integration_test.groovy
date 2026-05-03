@@ -71,15 +71,7 @@ echo "SUCCESS: Received HTTP 200 and body 'ok'"
 sudo docker compose -f docker-compose.yaml down
 ''')
     }
-    publishers {    
-        postBuildScript {
-            buildSteps {
-                shell('docker ps -aq | xargs -r docker stop | xargs -r docker rm || true')
-            }
-            onlyOnFailure(false)
-            onlyOnSuccess(false)
-            runIfResult('BOTH')
-        }
+    publishers {
         cleanWs {
             deleteDirs(true)
         }

@@ -39,16 +39,7 @@ job('build-nginx') {
 
     }
 
-    publishers {    
-        postBuildScript {
-            buildSteps {
-                shell('docker ps -aq | xargs -r docker stop | xargs -r docker rm || true')
-
-            }
-            onlyOnFailure(false)
-            onlyOnSuccess(false)
-            runIfResult('BOTH')
-        }
+    publishers {   
         cleanWs {
             deleteDirs(true)
         }
