@@ -22,6 +22,7 @@ job('build-app') {
         credentialsBinding {
             usernamePassword('DOCKER_USER', 'DOCKER_PASS', 'dockerhub-credentials')
         }
+        preBuildCleanup()
     }
 
     steps {
@@ -41,6 +42,15 @@ job('build-app') {
             docker push ${DOCKER_IMAGE_NAME}:${DOCKER_TAG}
         ''')
 
+    }
+
+    publishers {
+        postBuildTask {
+            task('.*', '''
+                docker stop $(docker ps -aq) || true
+                docker rm $(docker ps -aq) || true
+            ''')
+        }
     }
 
 }
