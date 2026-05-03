@@ -71,19 +71,14 @@ echo "SUCCESS: Received HTTP 200 and body 'ok'"
 sudo docker compose -f docker-compose.yaml down
 ''')
     }
-    publishers {
-        flexiblePublish {
-            step {
-                condition {
-                    alwaysRun()
-                }
-                publisher {
-                    shell('docker ps -aq | xargs -r docker stop | xargs -r docker rm || true')
-                }
-            }
-        }
+    publishers {    
         cleanWs {
             deleteDirs(true)
         }
+        postBuildScripts {
+        steps {
+            shell('docker ps -aq | xargs -r docker stop | xargs -r docker rm || true')
+        }
+    }
     }
 }

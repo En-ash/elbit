@@ -46,18 +46,13 @@ job('build-app') {
 
     }
     publishers {
-        flexiblePublish {
-            step {
-                condition {
-                    alwaysRun()
-                }
-                publisher {
-                    shell('docker ps -aq | xargs -r docker stop | xargs -r docker rm || true')
-                }
-            }
-        }
         cleanWs {
             deleteDirs(true)
         }
+        postBuildScripts {
+        steps {
+            shell('docker ps -aq | xargs -r docker stop | xargs -r docker rm || true')
+        }
+    }
     }
 }
