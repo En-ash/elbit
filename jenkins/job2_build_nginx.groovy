@@ -42,8 +42,8 @@ job('build-nginx') {
     publishers {    
         postBuildScript {
             buildSteps {
-                shell {
-                    command('docker ps -aq | xargs -r docker stop | xargs -r docker rm || true')
+                step {
+                    shell('docker ps -aq | xargs -r docker stop | xargs -r docker rm || true')
                 }
             }
             onlyOnFailure(false)

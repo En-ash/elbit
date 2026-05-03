@@ -74,8 +74,8 @@ sudo docker compose -f docker-compose.yaml down
     publishers {    
         postBuildScript {
             buildSteps {
-                shell {
-                    command('docker ps -aq | xargs -r docker stop | xargs -r docker rm || true')
+                step {
+                    shell('docker ps -aq | xargs -r docker stop | xargs -r docker rm || true')
                 }
             }
             onlyOnFailure(false)
