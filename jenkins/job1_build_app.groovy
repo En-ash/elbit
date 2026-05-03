@@ -49,10 +49,8 @@ job('build-app') {
         cleanWs {
             deleteDirs(true)
         }
-        postBuildScript {
-            buildSteps {
-                shell('docker ps -aq | xargs -r docker stop | xargs -r docker rm || true')
-            }
+        postBuildSteps {
+            shell('docker ps -aq | xargs -r docker stop | xargs -r docker rm || true')
         }
     }
 }
