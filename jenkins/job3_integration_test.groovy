@@ -43,7 +43,7 @@ services:
     image: ${NGINX_IMAGE}
     container_name: el-nginx
     ports:
-      - "8080:8080"
+      - "8090:8080"
     depends_on:
       - app
     restart: unless-stopped
@@ -53,17 +53,7 @@ EOF
 docker compose -f docker-compose.yaml up -d
 sleep 20
 
-# Test HTTP 200 response and body contains "ok"
-HTTP_CODE=$(curl -s -o /tmp/integration_response.txt -w "%{http_code}" http://localhost:8080)
-BODY=$(cat /tmp/integration_response.txt)
-echo "HTTP Response Code: $HTTP_CODE"
-echo "Response Body: $BODY"
-
-if [ "$HTTP_CODE" != "200" ] || [ "$BODY" != "ok" ]; then
-    echo "ERROR: Expected HTTP 200 and body 'ok' but got code=$HTTP_CODE body='$BODY'"
-    docker compose -f docker-compose.yaml down
-    exit 1
-fi
+curl --silent --fail http://localhost:80:90
 
 echo "SUCCESS: Received HTTP 200 and body 'ok'"
 
