@@ -45,9 +45,5 @@ job('build-app') {
         ''')
 
     }
-    publishers {
-        wsCleanup {
-            deleteDirs(true)
-        }
-    }
+
 }

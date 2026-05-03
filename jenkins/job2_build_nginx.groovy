@@ -39,9 +39,4 @@ job('build-nginx') {
 
     }
 
-    publishers {
-        wsCleanup {
-            deleteDirs(true)
-        }
-    }
 }
