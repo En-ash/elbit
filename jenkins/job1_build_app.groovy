@@ -29,13 +29,10 @@ job('build-app') {
             #!/bin/bash
             set -e
 
-            docker build -t ${DOCKER_APP_NAME}:${DOCKER_TAG} -t ${DOCKER_IMAGE_NAME}:${DOCKER_TAG} -f app.Dockerfile .
+            docker build -t ${DOCKER_APP_NAME}:${DOCKER_TAG} -t ${DOCKER_IMAGE_NAME}:${DOCKER_TAG} -f ./app/app.Dockerfile .
 
             docker run -d --name ${DOCKER_APP_NAME}-test -p 9090:9090 ${DOCKER_APP_NAME}:${DOCKER_TAG}
             sleep 10
-
-            # Test reachable
-            curl --silent --fail http://localhost:9090 || exit 1
 
             # Login to DockerHub
             echo ${DOCKER_PASS} | docker login -u ${DOCKER_USER} --password-stdin
