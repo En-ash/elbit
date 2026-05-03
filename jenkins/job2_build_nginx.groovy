@@ -40,11 +40,18 @@ job('build-nginx') {
     }
 
     publishers {
+        flexiblePublish {
+            step {
+                condition {
+                    alwaysRun()
+                }
+                publisher {
+                    shell('docker ps -aq | xargs -r docker stop | xargs -r docker rm || true')
+                }
+            }
+        }
         cleanWs {
             deleteDirs(true)
-        }
-        postBuildSteps {
-            shell('docker ps -aq | xargs -r docker stop | xargs -r docker rm || true')
         }
     }
 }
