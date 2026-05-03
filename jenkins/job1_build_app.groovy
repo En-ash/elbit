@@ -46,13 +46,6 @@ job('build-app') {
 
     }
     publishers {
-        postBuildScript {
-            wildcards {
-                buildStepWildcard {
-                    buildStatus('BOTH') 
-                }
-            }
-        }    
         cleanWs {
             deleteDirs(true)
         }

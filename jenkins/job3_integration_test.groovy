@@ -72,13 +72,6 @@ sudo docker compose -f docker-compose.yaml down
 ''')
     }
     publishers {
-        postBuildScript {
-            wildcards {
-                buildStepWildcard {
-                    buildStatus('BOTH') 
-                }
-            }
-        }
         cleanWs {
             deleteDirs(true)
         }
